@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="question" value="{{object.pk}}">
+        <h1 class="fs-4 mb-2">
+            {{object.question}}
+        </h1>
+        <p>
+            {{object.description|safe}}
+        </p>
+        {% if message %}
+            <h1 class="fs-4 text-danger text-center">{{message}}</h1>
+        {% else %}
+            <p id="timer" class="mb-0 text-danger">Time left: .. <b>seconds</b></p>
+            <div class="d-flex justify-content-center">
+                <div class="list-group list-group-radio d-grid gap-2 border-0 mt-4">
+
+                    {% for option in object.questionoptions_set.all %}
+                        <div class="position-relative">
+                        <input class="form-check-input position-absolute top-50 end-0 me-3 fs-5" type="radio" value="{{option.pk}}" name="answer" id="option-{{option.pk}}">
+                        <label class="list-group-item py-3 pe-5" for="option-{{option.pk}}">
+                            <strong class="fw-semibold">{{option.option}}</strong>
+                        </label>
+                        </div>
+                    {% endfor %}
+                    <div class="mt-3">
+                        <input type="submit" value="Submit" class="btn btn-primary px-5 fs-5 col-12">
+                        <div class="mt-2">
+                            <input type="submit" name="pause" value="Pause" class="btn btn-secondary px-5 fs-5 col-12">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </form>
+{% endblock %}
+
+{% block extra_js %}
+    {% if not message %}
+        <script type="text/javascript">
+            document.addEventListener("DOMContentLoaded", function(event) {
+                let time = parseInt('{{object.time}}');
+                const timer = document.getElementById("timer");
+                var x = setInterval(function() {
+                    var timer_str;
+                    if (time == 1) {
+                        timer_str = `Time left: <b>${time} second</b>`;
+                    }else {
+                        timer_str = `Time left: <b>${time} seconds</b>`;
+                    }
+                    time--;
+                    if (time < 0) {
+                        clearInterval(x);
+                        timer_str = "<b>Time's up!</b>";
+                    }
+                    timer.innerHTML = timer_str
+                    if (time == -1) {
+                        window.location.reload();
+                    }
+                }, 1100);
+            });
+        </script>
+    {% endif %}
+{% endblock extra_js %}

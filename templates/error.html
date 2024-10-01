@@ -1,0 +1,20 @@
+
+{% extends "base.html" %}
+
+{% block title %} {{title}} {{ status_code }}{% endblock %}
+
+{% block content %}
+    <div class="d-flex justify-content-center align-items-center" style="height: 50vh;">
+        <div class="text-center">
+            <div class="d-flex align-items-center">
+                <h1 class="me-3 pe-3 align-top border-dark border-end border-3 inline-block align-content-center">{{ status_code }}</h1>
+                <div class="inline-block align-middle">
+                    <h2 class="font-weight-normal lead fs-4" id="desc">{{ message }}</h2>
+                </div>
+            </div>
+            <a href="/" class="btn btn-primary ms-3 mt-3">
+                Back to Home
+            </a>
+        </div>
+    </div>
+{% endblock %}

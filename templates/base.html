@@ -1,0 +1,50 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" >
+    <link href="{% static 'css/list-groups.css' %}" rel="stylesheet" >
+    <title>Quiz App - {% block title %}{{title}}{% endblock title %}</title>
+    {% block extra_css %}{% endblock extra_css %}
+  </head>
+  <body style="background: #eee">
+    <div class="container p-5">
+      <div class="card {% block card_cls %}col-md-6 offset-md-3{% endblock %}" style="min-height: 60vh; max-height: 90vh">
+
+        <nav class="navbar border-bottom border-3">
+          <div class="container-fluid">
+            <a href="{% url 'quiz:index' %}" class="navbar-brand text-dark fw-bold fs-4">Quiz App</a>
+            <div class="d-flex gap-3">
+              {% if not request.user.is_authenticated %}
+                <a class="btn btn-sm btn-primary" href="{% url 'login' %}">Login</a>
+              {% else %}
+                <a class="btn btn-sm btn-link text-decoration-none fw-bold text-dark" href="{% url 'quiz:quizzes' %}">Quizzes</a>
+                <a class="btn btn-sm btn-link text-decoration-none fw-bold text-dark" href="{% url 'quiz:user_quizzes' %}">User Quizzes</a>
+                <form action="{% url 'logout' %}" method="post">
+                  {% csrf_token %}
+                  <input type="submit" class="btn btn-sm btn-danger" value="Logout">
+                </form>
+              {% endif %}
+            </div>
+          </div>
+        </nav>
+
+        <div class="p-4 mb-5">
+          {% block content %}{% endblock content %}
+        </div>
+        <footer class="card-footer p-2 mt-auto">
+          <p class="text-center mb-0">
+            <span>Designed and Developed by </span>
+            <a target="_blank" class="ps-1" href="//codzap.com">Codzap</a>
+          </p>
+        </footer>
+      </div>
+    </div>
+    {% block extra_js %}{% endblock extra_js %}
+  </body>
+</html>
