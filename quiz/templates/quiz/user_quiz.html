@@ -16,19 +16,22 @@
         <div class="mb-3">
             <a href="{% url 'quiz:quiz_detail' user_quiz.quiz.slug %}" class="text-decoration-none list-group-item py-3" aria-current="true">
                 <div class="d-flex gap-2 w-100">
-                    <div>
+                    <div class = "flex-grow-1">
                         <div class="d-flex justify-content-between align-items-center">
                             <h6 class="mb-0 fw-bold text-dark">
                                 {{ user_quiz.quiz.title }}
                             </h6>
                             <small class="opacity-50 text-nowrap text-dark fw-bold">
-                                {% if request.user|user_quiz_completed:user_quiz.quiz %}
+                                <span class="text-success">
+                                    Score is {{request.user|quiz_user_score:user_quiz.quiz}} out of {{user_quiz.quiz.total_questions}}
+                                </span>
+                                <!-- {% if request.user|user_quiz_completed:user_quiz.quiz %}
                                     <span class="text-success">
                                         Score is {{request.user|quiz_user_score:user_quiz.quiz}} out of {{user_quiz.quiz.total_questions}}
                                     </span>
                                 {% else %}
                                     <span class="text-warning">Not Completed</span>
-                                {% endif %}
+                                {% endif %} -->
                             </small>
                         </div>
                         <p class="mb-0 text-black-50 opacity-75">

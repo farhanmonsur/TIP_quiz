@@ -9,10 +9,11 @@
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" >
     <link href="{% static 'css/list-groups.css' %}" rel="stylesheet" >
+
     <title>Quiz App - {% block title %}{{title}}{% endblock title %}</title>
     {% block extra_css %}{% endblock extra_css %}
   </head>
-  <body style="background: #eee">
+  <body id = "body" style="background: #eee">
     <div class="container p-5">
       <div class="card {% block card_cls %}col-md-6 offset-md-3{% endblock %}" style="min-height: 60vh; max-height: 90vh">
 
@@ -34,15 +35,10 @@
           </div>
         </nav>
 
-        <div class="p-4 mb-5">
+        <div class="p-4 flex-grow-1 d-flex flex-column">
           {% block content %}{% endblock content %}
         </div>
-        <footer class="card-footer p-2 mt-auto">
-          <p class="text-center mb-0">
-            <span>Designed and Developed by </span>
-            <a target="_blank" class="ps-1" href="//codzap.com">Codzap</a>
-          </p>
-        </footer>
+        
       </div>
     </div>
     {% block extra_js %}{% endblock extra_js %}

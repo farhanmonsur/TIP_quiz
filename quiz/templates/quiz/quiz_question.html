@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <form method="post">
+    <form name = "questionForm" id = "question-form" method="post">
         {% csrf_token %}
         <input type="hidden" name="question" value="{{object.pk}}">
         <h1 class="fs-4 mb-2">
@@ -10,26 +10,40 @@
         <p>
             {{object.description|safe}}
         </p>
-        {% if message %}
-            <h1 class="fs-4 text-danger text-center">{{message}}</h1>
+        {% if messages  %}
+            <h1 class="fs-4 text-danger text-center">{{messages }}</h1>
         {% else %}
             <p id="timer" class="mb-0 text-danger">Time left: .. <b>seconds</b></p>
             <div class="d-flex justify-content-center">
-                <div class="list-group list-group-radio d-grid gap-2 border-0 mt-4">
-
+                <div class="list-group list-group-radio d-grid gap-2 border-0 mt-4 z-n1">
                     {% for option in object.questionoptions_set.all %}
                         <div class="position-relative">
-                        <input class="form-check-input position-absolute top-50 end-0 me-3 fs-5" type="radio" value="{{option.pk}}" name="answer" id="option-{{option.pk}}">
-                        <label class="list-group-item py-3 pe-5" for="option-{{option.pk}}">
-                            <strong class="fw-semibold">{{option.option}}</strong>
-                        </label>
+                            <input class="form-check-input position-absolute top-50 end-0 me-3 fs-5" type="radio" value="{{option.pk}}" name="answer" id="option-{{option.pk}}">
+                            <label class="list-group-item py-3 pe-5" for="option-{{option.pk}}">
+                                <strong class="fw-semibold">{{option.option}}</strong>
+                            </label>
                         </div>
                     {% endfor %}
                     <div class="mt-3">
-                        <input type="submit" value="Submit" class="btn btn-primary px-5 fs-5 col-12">
-                        <div class="mt-2">
-                            <input type="submit" name="pause" value="Pause" class="btn btn-secondary px-5 fs-5 col-12">
-                        </div>
+                        <input id = "submitBtn" type="submit" value="Submit" class="btn btn-primary px-5 fs-5 col-12">
+                        
+                    </div>
+                </div>
+            </div>
+            <div id = "feedback-correct" class = "text-white fw-bold position-fixed vw-100 vh-100 top-0 start-0" style = "z-index: 2; background-color: rgb(0,0,0,0.1); display:none">
+                
+                <div class = "bg-success w-25 m-auto h-25 p-4 d-flex flex-column rounded">
+                    <div class = "m-auto">
+                        <div class = "text-center">&#127882; &#128513;&#128513;&#128513; &#127882;</div>
+                        <div class = "text-center">Congratulations! You are doing a great job!</div>
+                    </div>
+                </div>
+            </div>
+            <div id = "feedback-wrong" class = "text-white fw-bold position-fixed vw-100 vh-100 top-0 start-0" style = "z-index: 2; background-color: rgb(0,0,0,0.1); display:none">
+                <div class = "bg-danger w-25 m-auto h-25 p-4 d-flex flex-column rounded">
+                    <div class = "m-auto">
+                        <div class = "text-center">&#128079; &#128559;&#128559;&#128559; &#128079;</div>
+                        <div class = "text-center">Better luck next time, you can do it!</div>
                     </div>
                 </div>
             </div>
@@ -38,29 +52,76 @@
 {% endblock %}
 
 {% block extra_js %}
-    {% if not message %}
+    {% if not messages  %}
         <script type="text/javascript">
+            const submitButton = document.getElementById("submitBtn")
+            const questionForm = document.getElementById("question-form")
+            const body = document.getElementById("body")
+            var x = ''
+            
             document.addEventListener("DOMContentLoaded", function(event) {
                 let time = parseInt('{{object.time}}');
                 const timer = document.getElementById("timer");
-                var x = setInterval(function() {
+
+                // Display the initial timer value as soon as the page loads
+                if (time == 1) {
+                    timer.innerHTML = `Time left: <b>${time} second</b>`;
+                } else {
+                    timer.innerHTML = `Time left: <b>${time} seconds</b>`;
+                }
+
+                // Start the countdown
+                x = setInterval(function() {
+                    time--;
+
                     var timer_str;
                     if (time == 1) {
                         timer_str = `Time left: <b>${time} second</b>`;
-                    }else {
+                    } else {
                         timer_str = `Time left: <b>${time} seconds</b>`;
                     }
-                    time--;
+
                     if (time < 0) {
                         clearInterval(x);
                         timer_str = "<b>Time's up!</b>";
                     }
-                    timer.innerHTML = timer_str
+
+                    timer.innerHTML = timer_str;
+
+                    // Optional: Refresh the page when time is up
                     if (time == -1) {
                         window.location.reload();
                     }
-                }, 1100);
+                }, 1000);  // Adjusted to 1000ms for a smoother countdown
             });
+
+            const formData = new FormData(questionForm);
+            let isCorrect = '{{ correct_answer  }}' === 'True';  
+            let isAnswered = '{{ correct_answer  }}' !== '';    
+
+            document.getElementById("question-form").onsubmit = (event) => {
+                event.preventDefault();  // Prevent the form from submitting immediately
+                let selectedOption = document.querySelector('input[name="answer"]:checked');
+                const selectedAnswer = document.querySelector(`label[for="option-${selectedOption.value}"]`).textContent.trim();
+
+                const correctAnswerText = '{{ correct_option_text }}'.trim();  
+
+                const isCorrect = selectedAnswer === correctAnswerText;
+                const isAnswered = selectedAnswer !== '';             
+
+                if (isAnswered) {
+                    let color = isCorrect ? "green" : "red";  
+                    let feedback = isCorrect ? "feedback-correct" : "feedback-wrong";
+                    let body = document.getElementById("body");
+                    console.log(document.getElementById(feedback))
+                    document.getElementById(feedback).style.display = "flex";
+                    clearInterval(x);
+                    setTimeout(() => {
+                        event.target.submit();  
+                    }, 2000);  
+                }
+            };          
         </script>
     {% endif %}
+    
 {% endblock extra_js %}

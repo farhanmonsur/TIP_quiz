@@ -121,3 +121,24 @@ LOGIN_REDIRECT_URL = reverse_lazy('quiz:index')
 LOGIN_URL = reverse_lazy('login')
 LOGOUT_REDIRECT_URL = reverse_lazy('login')
 LOGOUT_URL = reverse_lazy('login')
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'WARNING',  # Only show warnings or above from Django
+        },
+        'quiz': {  # Your custom app
+            'handlers': ['console'],
+            'level': 'DEBUG',  # Show debug info for your quiz app
+        },
+    },
+}

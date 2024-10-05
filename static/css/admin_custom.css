@@ -1,0 +1,21 @@
+* {
+    box-sizing: border-box;
+}
+
+.original {
+    display: none;
+}
+
+td {
+    padding-top: 1em !important;
+}
+
+.vTextField {
+    /* width: auto !important; */
+    /* min-width: 100% !important;  */
+    flex-grow: 1;
+}
+
+a.deletelink {
+    height: 100% !important;
+}

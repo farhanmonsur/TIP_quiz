@@ -3,8 +3,8 @@
 {% load quiz %}
 
 {% block content %}
-<h1 class="fs-3 pb-4">Quizzes</h1>
-    {% if not quiz_list %}
+<h1 class="fs-3 pb-4">Levels</h1>
+    <!-- {% if not quiz_list %}
         <div class="col-12 card">
             <div class="card-body">
                 <p class="mb-0 card-text fw-bold text-center text-danger">
@@ -12,8 +12,14 @@
                 </p>
             </div>
         </div>
-    {% endif %}
-    {% for quiz in quiz_list %}
+    {% endif %} -->
+    <ul>
+    {% for level in levels %}
+        <li><a href="{% url 'quiz:level_quizzes' level.slug %}">{{ level.name }}</a></li>
+    {% endfor %}
+    </ul>
+
+    <!-- {% for quiz in quiz_list %}
         <div class="mb-3">
             <a href="{% url 'quiz:quiz_detail' quiz.slug %}" class="text-decoration-none list-group-item py-3" aria-current="true">
                 <div class="d-flex gap-2 w-100">
@@ -47,5 +53,5 @@
                 </div>
             </a>
         </div>
-    {% endfor %}
+    {% endfor %} -->
 {% endblock %}

@@ -5,6 +5,7 @@ app_name = "quiz"
 
 urlpatterns = [
     path('', views.IndexView.as_view(), name="index"),
+    path('level/<slug:slug>/', views.LevelQuizView.as_view(), name='level_quizzes'),
     path('quizzes/', views.QuizView.as_view(), name="quizzes"),
     path('quiz/<slug:slug>/', views.QuizDetail.as_view(), name="quiz_detail"),
     path(

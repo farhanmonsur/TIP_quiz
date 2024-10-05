@@ -2,8 +2,11 @@
 {% load static %}
 
 {% block content %}
-	<div id="container">
-		<img src="{% static 'img/quiz.png' %}" class="w-100" >
+	<div id="container" class = "m-auto">
+		<div class = "w-100 text-center">
+			<div class = "fw-bold fs-5">Welcome to the QuizApp, {{ request.user.username }}!</div>
+			<div>Click here to play the quizzes</div>
+		</div>
 		<div class="text-center mt-2">
 			<a class="btn btn-lg px-5 btn-primary" href="{% url 'quiz:quizzes' %}">
 				View Quiz

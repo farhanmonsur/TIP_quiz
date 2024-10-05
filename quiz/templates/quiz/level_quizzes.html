@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }}{% endblock title %}
+
+{% block content %}
+  <h2 class="text-center">{{ level.name }} Quizzes</h2>
+  <p>{{ level.description }}</p>
+
+  <ul class="list-group">
+    {% for quiz in quizzes %}
+      <li class="">
+        <a href="{% url 'quiz:quiz_detail' quiz.slug %}">{{ quiz.title }}</a>
+      </li>
+    {% empty %}
+      <li class="list-group-item">No quizzes available for this level.</li>
+    {% endfor %}
+  </ul>
+{% endblock content %}
