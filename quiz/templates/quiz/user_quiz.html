@@ -1,6 +1,5 @@
 {% extends 'base.html' %}
 {% load static quiz %}
-
 {% block content %}
 <h1 class="fs-3 pb-4">Quizzes</h1>
     {% if not quiz_list %}
@@ -22,8 +21,11 @@
                                 {{ user_quiz.quiz.title }}
                             </h6>
                             <small class="opacity-50 text-nowrap text-dark fw-bold">
+                                <span class="fa fa-star" id = "{{ user_quiz.quiz.slug|add:'-1-star' }}"></span>
+                                <span class="fa fa-star" id = "{{ user_quiz.quiz.slug|add:'-2-star' }}"></span>
+                                <span class="fa fa-star" id = "{{ user_quiz.quiz.slug|add:'-3-star' }}"></span>
                                 <span class="text-success">
-                                    Score is {{request.user|quiz_user_score:user_quiz.quiz}} out of {{user_quiz.quiz.total_questions}}
+                                    <!-- Score is {{request.user|quiz_user_score:user_quiz.quiz}} out of {{user_quiz.quiz.total_questions}} -->
                                 </span>
                                 <!-- {% if request.user|user_quiz_completed:user_quiz.quiz %}
                                     <span class="text-success">
@@ -42,4 +44,27 @@
             </a>
         </div>
     {% endfor %}
+        <script type="text/javascript">         
+            const quizList = JSON.parse('{{ quiz_list_json|escapejs }}');
+            quizList.forEach((quiz) => {
+                let star1 = document.getElementById(quiz["quiz_slug"] + "-1-star")
+                let star2 = document.getElementById(quiz["quiz_slug"] + "-2-star")
+                let star3 = document.getElementById(quiz["quiz_slug"] + "-3-star")
+                let overallScore = quiz["score"]/quiz["total"]
+
+                if(overallScore >= 0.8) {
+                    star1.style.color = "orange"
+                    star2.style.color = "orange"
+                    star3.style.color = "orange"
+                }
+                else if(overallScore < 0.8 && overallScore >= 0.5) {
+                    star1.style.color = "orange"
+                    star2.style.color = "orange"
+                }
+                else if(overallScore < 0.5 && overallScore >= 0.25) {
+                    star1.style.color = "orange"
+                }
+            });
+
+        </script>   
 {% endblock %}
