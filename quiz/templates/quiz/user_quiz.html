@@ -21,10 +21,13 @@
                                 {{ user_quiz.quiz.title }}
                             </h6>
                             <small class="opacity-50 text-nowrap text-dark fw-bold">
-                                <span class="fa fa-star" id = "{{ user_quiz.quiz.slug|add:'-1-star' }}"></span>
-                                <span class="fa fa-star" id = "{{ user_quiz.quiz.slug|add:'-2-star' }}"></span>
-                                <span class="fa fa-star" id = "{{ user_quiz.quiz.slug|add:'-3-star' }}"></span>
-                                <span class="text-success">
+                                <div class = "d-flex" data-bs-toggle="tooltip" data-placement="top" title="Score is {{request.user|quiz_user_score:user_quiz.quiz}} out of {{user_quiz.quiz.total_questions}}">
+                                    <span class="fa fa-star" id = "{{ user_quiz.quiz.slug|add:'-1-star' }}"></span>
+                                    <span class="fa fa-star" id = "{{ user_quiz.quiz.slug|add:'-2-star' }}"></span>
+                                    <span class="fa fa-star" id = "{{ user_quiz.quiz.slug|add:'-3-star' }}"></span>
+                                    <span class="text-success">
+                                </div>
+                               
                                     <!-- Score is {{request.user|quiz_user_score:user_quiz.quiz}} out of {{user_quiz.quiz.total_questions}} -->
                                 </span>
                                 <!-- {% if request.user|user_quiz_completed:user_quiz.quiz %}
@@ -44,7 +47,12 @@
             </a>
         </div>
     {% endfor %}
-        <script type="text/javascript">         
+        <script type="text/javascript">     
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+                var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl)
+            })
+ 
             const quizList = JSON.parse('{{ quiz_list_json|escapejs }}');
             quizList.forEach((quiz) => {
                 let star1 = document.getElementById(quiz["quiz_slug"] + "-1-star")
