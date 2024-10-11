@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
     <form name = "questionForm" id = "question-form" method="post">
@@ -59,6 +60,36 @@
             const body = document.getElementById("body")
             var x = ''
             
+            const formData = new FormData(questionForm);
+            let isCorrect = '{{ correct_answer  }}' === 'True';  
+            let isAnswered = '{{ correct_answer  }}' !== '';    
+
+            document.getElementById("question-form").onsubmit = (event) => {
+                event.preventDefault();  // Prevent the form from submitting immediately
+                let selectedOption = document.querySelector('input[name="answer"]:checked');
+                const selectedAnswer = document.querySelector(`label[for="option-${selectedOption.value}"]`).textContent.trim();
+
+                const correctAnswerText = '{{ correct_option_text }}'.trim();  
+
+                const isCorrect = selectedAnswer === correctAnswerText;
+                const isAnswered = selectedAnswer !== '';             
+
+                if (isAnswered) {
+                    let color = isCorrect ? "green" : "red";  
+                    let audio = isCorrect ? "correct1.mp3" : "wrong.mp3";
+                    let feedback = isCorrect ? "feedback-correct" : "feedback-wrong";
+                    let body = document.getElementById("body");
+                    document.getElementById(feedback).style.display = "flex";
+                    clearInterval(x);
+                    var audioUrl = "{% static 'audio/' %}" + audio;
+                    let sound = new Audio(audioUrl);
+                    sound.play();
+                    setTimeout(() => {
+                        event.target.submit();  
+                    }, 2000);  
+                }
+            };        
+
             document.addEventListener("DOMContentLoaded", function(event) {
                 let time = parseInt('{{object.time}}');
                 const timer = document.getElementById("timer");
@@ -84,43 +115,45 @@
                     if (time < 0) {
                         clearInterval(x);
                         timer_str = "<b>Time's up!</b>";
+                        let selectedOption = document.querySelector('input[name="answer"]:checked');
+                        if(selectedOption) {
+                            const selectedAnswer = document.querySelector(`label[for="option-${selectedOption.value}"]`).textContent.trim();
+                            const correctAnswerText = '{{ correct_option_text }}'.trim();  
+                            const isCorrect = selectedAnswer === correctAnswerText;
+                            let color = isCorrect ? "green" : "red";  
+                            let audio = isCorrect ? "correct1.mp3" : "wrong.mp3";
+                            let feedback = isCorrect ? "feedback-correct" : "feedback-wrong";
+                            let body = document.getElementById("body");
+                            document.getElementById(feedback).style.display = "flex";
+                            var audioUrl = "{% static 'audio/' %}" + audio;
+                            let sound = new Audio(audioUrl);
+                            sound.play();
+                            setTimeout(() => {
+                                document.getElementById("question-form").submit();  
+                            }, 2000);  
+                        }
+                        else {
+                            let color = "red";  
+                            let audio = "wrong.mp3";
+                            let feedback = "feedback-wrong";
+                            let body = document.getElementById("body");
+                            document.getElementById(feedback).style.display = "flex";
+                            var audioUrl = "{% static 'audio/' %}" + audio;
+                            let sound = new Audio(audioUrl);
+                            sound.play();
+                            setTimeout(() => {
+                                document.getElementById("question-form").submit();  
+                            }, 2000);  
+                        }
+                        
+                        
                     }
 
                     timer.innerHTML = timer_str;
-
-                    // Optional: Refresh the page when time is up
-                    if (time == -1) {
-                        window.location.reload();
-                    }
                 }, 1000);  // Adjusted to 1000ms for a smoother countdown
             });
 
-            const formData = new FormData(questionForm);
-            let isCorrect = '{{ correct_answer  }}' === 'True';  
-            let isAnswered = '{{ correct_answer  }}' !== '';    
-
-            document.getElementById("question-form").onsubmit = (event) => {
-                event.preventDefault();  // Prevent the form from submitting immediately
-                let selectedOption = document.querySelector('input[name="answer"]:checked');
-                const selectedAnswer = document.querySelector(`label[for="option-${selectedOption.value}"]`).textContent.trim();
-
-                const correctAnswerText = '{{ correct_option_text }}'.trim();  
-
-                const isCorrect = selectedAnswer === correctAnswerText;
-                const isAnswered = selectedAnswer !== '';             
-
-                if (isAnswered) {
-                    let color = isCorrect ? "green" : "red";  
-                    let feedback = isCorrect ? "feedback-correct" : "feedback-wrong";
-                    let body = document.getElementById("body");
-                    console.log(document.getElementById(feedback))
-                    document.getElementById(feedback).style.display = "flex";
-                    clearInterval(x);
-                    setTimeout(() => {
-                        event.target.submit();  
-                    }, 2000);  
-                }
-            };          
+              
         </script>
     {% endif %}
     

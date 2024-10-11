@@ -168,20 +168,19 @@ class QuestionAnswer(QuizMixin, TemplateView):
 
     def post(self, request, *args, **kwargs):
         data = request.POST
-        logger.debug(f"\nPost - User: {request.user} submitting answer for quiz: {self.quiz.title}, Data: {data}\n")
-
+        selected_answer = data.get('answer', 'no-answer')
         user_answer = get_object_or_404(
             models.UserQuestionAnswer,
             user_quiz=self.user_quiz,
             question=self.quiz.question_set.get(id=data['question']),
         )
-        logger.debug(f"Saving answer for user: {request.user}, Question: {user_answer.question}, Answer: {data['answer']}")
-        #asdfdsafasdfasdf
-        user_answer.answer_id = data['answer']
-        user_answer.save()
-
-        is_correct  = user_answer.answer.answer
-        self.extra_context['correct_answer'] = is_correct
+        
+        if(not selected_answer == 'no-answer'):
+            user_answer.answer_id = data['answer']
+            user_answer.save()
+            is_correct  = user_answer.answer.answer
+            self.extra_context['correct_answer'] = is_correct
+        
 
         return self.get(request, *args, **kwargs)
 
@@ -208,7 +207,6 @@ class UserQuizList(QuizMixin, TemplateView):
     def get_context_data(self, **kwargs):
         kwargs = super().get_context_data(**kwargs)
         kwargs['quiz_list'] = self.get_user_quizzes()
-        logger.debug(f"Quiz list - {kwargs['quiz_list'][0]}")
         quiz_data = [{
             'user': user_quiz.user.username,
             'user_id': user_quiz.user.id,
