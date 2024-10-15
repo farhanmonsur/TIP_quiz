@@ -3,8 +3,11 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect
 from django.utils.decorators import method_decorator
 from django.utils import timezone
+from django.core import serializers
 import logging
 from quiz import models
+import json
+
 logger = logging.getLogger(__name__)
 
 
@@ -22,7 +25,9 @@ class QuizMixin:
 
     def get_user_quizzes(self, queryset=None):
         if not queryset:
-            queryset = models.UserQuiz.objects.filter(user=self.request.user)
+            # queryset = models.UserQuiz.objects.filter(user=self.request.user)
+            queryset = models.UserQuiz.objects.filter(user=self.request.user, quiz__published=True)  # Add filter for published quizzes
+
         return queryset
 
     def get_user_quiz(self, queryset=None, quiz=None):
@@ -49,13 +54,16 @@ class LevelQuizView(TemplateView):
         level = get_object_or_404(models.Level, slug=self.kwargs['slug'])
         
         # Get all quizzes that belong to this level
-        quizzes = models.Quiz.objects.filter(level=level)
         
+        # quizzes = models.Quiz.objects.filter(level=level)
+        quizzes = models.Quiz.objects.filter(level=level, published=True)  # Add filter for published quizzes
+
         # Pass the level and quizzes to the context
         context['level'] = level
         context['quizzes'] = quizzes
         context['title'] = f"Quizzes for Level: {level.name}"
-        
+        logger.debug(f"Quizzes: {quizzes}")
+
         return context
 
 class QuizView(QuizMixin, TemplateView):
@@ -200,4 +208,17 @@ class UserQuizList(QuizMixin, TemplateView):
     def get_context_data(self, **kwargs):
         kwargs = super().get_context_data(**kwargs)
         kwargs['quiz_list'] = self.get_user_quizzes()
+        logger.debug(f"Quiz list - {kwargs['quiz_list'][0]}")
+        quiz_data = [{
+            'user': user_quiz.user.username,
+            'user_id': user_quiz.user.id,
+            'quiz_title': user_quiz.quiz.title,
+            'quiz_slug': user_quiz.quiz.slug,
+            'score': user_quiz.score,
+            'total': user_quiz.total_score,
+        } for user_quiz in kwargs['quiz_list']]
+
+        # Add the quiz data to the context in JSON format
+        kwargs['quiz_list_json'] = json.dumps(quiz_data)
+
         return kwargs
