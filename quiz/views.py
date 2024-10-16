@@ -25,15 +25,33 @@ class QuizMixin:
 
     def get_user_quizzes(self, queryset=None):
         if not queryset:
-            # queryset = models.UserQuiz.objects.filter(user=self.request.user)
-            queryset = models.UserQuiz.objects.filter(user=self.request.user, quiz__published=True)  # Add filter for published quizzes
-
+            queryset = models.UserQuiz.objects.filter(user=self.request.user, quiz__published=True)  
         return queryset
 
     def get_user_quiz(self, queryset=None, quiz=None):
         if not queryset:
             queryset = self.get_user_quizzes()
         return get_object_or_404(queryset, quiz=quiz)
+    
+    def get_all_user_quizzes(self, queryset=None):
+        if not queryset:
+            queryset = models.UserQuiz.objects.all()  
+        return queryset
+    
+    def get_all_user_scores(self, queryset=None):
+        if not queryset:
+            queryset = models.UserScore.objects.all()  
+        return queryset
+
+    def get_all_rewards(self, queryset=None):
+        if not queryset:
+            queryset = models.Reward.objects.all()  
+        return queryset
+    
+    def get_all_user_rewards(self, queryset=None):
+        if not queryset:
+            queryset = models.UserReward.objects.all()  
+        return queryset
 
     @method_decorator(login_required)
     def dispatch(self, request, *args, **kwargs):
@@ -47,22 +65,15 @@ class LevelQuizView(TemplateView):
     template_name = "quiz/level_quizzes.html"
 
     def get_context_data(self, **kwargs):
-        # Get the context from the base implementation
         context = super().get_context_data(**kwargs)
         
-        # Retrieve the level object based on the slug in the URL
         level = get_object_or_404(models.Level, slug=self.kwargs['slug'])
         
-        # Get all quizzes that belong to this level
-        
-        # quizzes = models.Quiz.objects.filter(level=level)
         quizzes = models.Quiz.objects.filter(level=level, published=True)  # Add filter for published quizzes
 
-        # Pass the level and quizzes to the context
         context['level'] = level
         context['quizzes'] = quizzes
         context['title'] = f"Quizzes for Level: {level.name}"
-        logger.debug(f"Quizzes: {quizzes}")
 
         return context
 
@@ -103,85 +114,66 @@ class QuizDetail(QuizMixin, DetailView):
 class QuestionAnswer(QuizMixin, TemplateView):
     template_name = "quiz/quiz_question.html"
     extra_context = {}
-
     def get_question(self):
         self.user_question_ans_ids = self.user_quiz.userquestionanswer_set.values_list('question__id', flat=True)
-        logger.debug(f"Answered questions: {self.user_question_ans_ids}")
         question = self.quiz.question_set.exclude(id__in=self.user_question_ans_ids).order_by('?').first()
-        if question:
-            logger.debug(f"Next question: {question.question}")
-        else:
-            logger.debug("No more questions available!")
-
         return question
 
     def dispatch(self, request, *args, **kwargs):
         self.quiz = self.get_quiz()
         self.user_quiz = self.get_user_quiz(quiz=self.quiz)
-        logger.debug(f"Dispatch - User: {request.user}, Quiz: {self.quiz.title}, UserQuiz: {self.user_quiz}")
 
         if not self.user_quiz:
-            logger.debug(f"Redirection - User: {request.user} has no existing UserQuiz for quiz: {self.quiz.title}. Redirecting to quiz detail.")
             return redirect('quiz:quiz_detail', self.kwargs['slug'])
         self.question = self.get_question()
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
-        logger.debug(f"\nHandling GET request for user: {request.user}, Quiz: {self.quiz.title}\n")
         if self.user_quiz.completed(request.user, self.quiz):
-            logger.debug(f"Completed get - User: {request.user} has completed the quiz: {self.quiz.title}. Redirecting to quiz completion page.")
             return redirect('quiz:quiz_complete', self.kwargs['slug'])
         if not self.question:
-            logger.debug(f"No more questions available for user: {request.user} in quiz: {self.quiz.title}")
             self.extra_context["message"] = "Question not available now"
         else:
-            logger.debug(f"Creating UserQuestionAnswer for user: {request.user}, Question: {self.question.question}")
             models.UserQuestionAnswer.objects.create(
                 user_quiz=self.user_quiz, question=self.question,
             )
 
             question_options = self.question.questionoptions_set.all()  # Fetch all options for this question
-            logger.debug(f"Generating question options: {request.user}, options: {question_options}")
 
             options_data = [{'option_text': option.option, 'is_answer': option.answer} for option in question_options]
             correct_option = next((opt for opt in options_data if opt['is_answer']), None)
 
             if correct_option:
-                logger.debug(f"Correct answer is: {correct_option['option_text']}")
                 self.extra_context['correct_option_text'] = correct_option['option_text'] 
 
-            # Add the formatted options data to the extra context
             self.extra_context['question_options'] = options_data
-
-            logger.debug(f"Options data: {options_data}")
-
+        
         return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         kwargs = super().get_context_data(**kwargs)
         kwargs['object'] = self.question
         kwargs['title'] = self.question.question
-        kwargs['question_options'] = self.extra_context.get('question_options', [])  # Include the formatted options in the context
-        kwargs['correct_option_text'] = self.extra_context.get('correct_option_text', '')  # Pass correct answer to the context
+        kwargs['question_options'] = self.extra_context.get('question_options', []) 
+        kwargs['correct_option_text'] = self.extra_context.get('correct_option_text', '')  
 
         return kwargs
 
     def post(self, request, *args, **kwargs):
         data = request.POST
-        selected_answer = data.get('answer', 'no-answer')
+        selected_answer = data.get('answer', 'no_answer')
         user_answer = get_object_or_404(
             models.UserQuestionAnswer,
             user_quiz=self.user_quiz,
             question=self.quiz.question_set.get(id=data['question']),
         )
-        
-        if(not selected_answer == 'no-answer'):
+
+        if(not selected_answer == 'no_answer' and not selected_answer == ""):
             user_answer.answer_id = data['answer']
             user_answer.save()
             is_correct  = user_answer.answer.answer
             self.extra_context['correct_answer'] = is_correct
-        
-
+            
         return self.get(request, *args, **kwargs)
 
 class QuizCompleteView(QuizMixin, TemplateView):
@@ -213,10 +205,94 @@ class UserQuizList(QuizMixin, TemplateView):
             'quiz_title': user_quiz.quiz.title,
             'quiz_slug': user_quiz.quiz.slug,
             'score': user_quiz.score,
-            'total': user_quiz.total_score,
+            'total': user_quiz.total_questions,
         } for user_quiz in kwargs['quiz_list']]
 
         # Add the quiz data to the context in JSON format
         kwargs['quiz_list_json'] = json.dumps(quiz_data)
 
         return kwargs
+
+class LeaderboardView(QuizMixin, TemplateView):
+    template_name = "quiz/leaderboard.html"
+    extra_context = {'title': "Leaderboard"}
+
+    def get_context_data(self, **kwargs):
+        kwargs = super().get_context_data(**kwargs)
+        kwargs['quiz_list_total'] = self.get_all_user_quizzes()
+        kwargs['quiz_scores'] = self.get_all_user_scores()
+        logger.debug(kwargs['quiz_scores'])
+        user_scores = []
+        for user_quiz in kwargs['quiz_scores']:
+            tempDict = {
+                "id": user_quiz.user.id,
+                "user": user_quiz.user.username,
+                "score": user_quiz.total_score
+            }
+            user_scores.append(tempDict)
+        user_scores = sorted(user_scores, key=lambda x: x['score'], reverse=True)
+        kwargs["user_scores"] = user_scores
+        logger.debug(user_scores)
+        return kwargs
+
+class RewardView(QuizMixin, TemplateView):
+    template_name = "quiz/reward.html"
+    extra_context = {'title': "Reward"}
+
+    def get_context_data(self, **kwargs):
+        kwargs = super().get_context_data(**kwargs)
+        kwargs['reward_list'] = self.get_all_rewards()
+        rewards = []
+        for reward_item in kwargs['reward_list']:
+            tempDict = {
+                "id": reward_item.id,
+                "name": "asd",
+                "description": reward_item.description,
+                "exchanged_points": reward_item.exchanged_points,
+                "quantity": reward_item.quantity,
+            }
+            rewards.append(tempDict)
+        kwargs["reward_list"] = rewards
+        logger.debug(rewards)
+        return kwargs
+    
+    def get(self, request, *args, **kwargs):
+        kwargs = super().get_context_data(**kwargs)
+        user_score = models.UserScore.objects.get(user=self.request.user)
+        kwargs['user_score'] = user_score.total_score
+        kwargs['reward_list'] = models.Reward.objects.filter(quantity__gt=0)
+        logger.debug(kwargs['reward_list'])
+        logger.debug(user_score.total_score)
+        return self.render_to_response(kwargs)
+
+    def post(self, request, *args, **kwargs):
+        reward_id = request.POST.get('reward_id', None)
+        user_score = models.UserScore.objects.get(user=request.user)
+
+        if reward_id:
+            reward = get_object_or_404(models.Reward, id=reward_id)
+
+            # Logging the user and reward for debugging purposes
+            logger.debug(f"User {request.user.username} attempting to redeem reward: {reward.name}")
+
+            # Here you would normally check if the user has enough points, etc.
+            if user_score.total_score >= reward.exchanged_points:
+                logger.debug(f"User {request.user.username} has enough points to redeem {reward.name}.")
+
+                user_score.total_score -= reward.exchanged_points
+                user_score.save()
+                
+                reward.quantity -= 1
+                reward.save()
+
+                # Create a new UserReward entry for the user
+                models.UserReward.objects.create(user=request.user, reward=reward)
+                logger.debug(f"Reward {reward.name} redeemed by user {request.user.username}.")
+
+                logger.debug(f"Reward {reward.name} redeemed by user {request.user.username}.")
+            else:
+                logger.debug(f"User {request.user.username} does not have enough points for {reward.name}.")
+        else:
+            logger.debug("No reward_id detected.")
+
+        return self.get(request, *args, **kwargs)

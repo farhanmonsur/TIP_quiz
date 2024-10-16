@@ -34,7 +34,6 @@ def user_quiz_completed(user, quiz):
 
     # Compare it with the total number of questions in the quiz
     total_questions = quiz.question_set.count()
-    logger.debug(f"\nUser: {user}, Quiz: {quiz.title}, Answered: {answered_questions}, Total: {total_questions}\n")
 
     # Return True if all questions are answered
     return answered_questions == total_questions

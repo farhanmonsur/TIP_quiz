@@ -3,55 +3,26 @@
 {% load quiz %}
 
 {% block content %}
-<h1 class="fs-3 pb-4">Levels</h1>
-    <!-- {% if not quiz_list %}
-        <div class="col-12 card">
-            <div class="card-body">
-                <p class="mb-0 card-text fw-bold text-center text-danger">
-                    No Quizzes added yet.
-                </p>
+<div class="d-flex flex-column h-100">
+    <div class="h1 text-center">Levels</div>
+    <div class = "container d-grid text-center mt-5">
+        <div class = "row gap-5">
+            {% for level in levels %}
+            <div class="col border rounded" style = "background-color: #E7E7E7; padding: 2em 0;">
+                <div class = "h4 flex-grow my-5"  >{{ level.name }}</div>
+                <a class = "fs-6 py-2 rounded mt-5 px-4" style = "text-decoration: none; color: white; background-color: #5856D6;" href="{% url 'quiz:level_quizzes' level.slug %}" >Click here to play</a>
             </div>
+            {% endfor %}
         </div>
-    {% endif %} -->
-    <ul>
-    {% for level in levels %}
-        <li><a href="{% url 'quiz:level_quizzes' level.slug %}">{{ level.name }}</a></li>
-    {% endfor %}
-    </ul>
+    </div>
+</div>
 
-    <!-- {% for quiz in quiz_list %}
-        <div class="mb-3">
-            <a href="{% url 'quiz:quiz_detail' quiz.slug %}" class="text-decoration-none list-group-item py-3" aria-current="true">
-                <div class="d-flex gap-2 w-100">
-                    <div>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <h6 class="mb-0 fw-bold text-dark">
-                                {{ quiz.title }}
-                            </h6>
-                            <small class="opacity-50 text-nowrap text-dark fw-bold">
-                                {% if request.user|user_quiz:quiz %}
-                                    {% if request.user|user_quiz_completed:quiz %}
-                                        <span class="text-success">
-                                            Score is {{request.user|quiz_user_score:quiz}} out of {{quiz.total_questions}}
-                                        </span>
-                                    {% else %}
-                                        <span class="text-warning">Not Completed</span>
-                                    {% endif %}
-                                {% elif quiz.is_closed %}
-                                    <span class="text-danger">Closed</span>
-                                {% elif quiz.end_date %}
-                                    {{ quiz.end_date|timeuntil }} left
-                                {% else %}
-                                    {{ quiz.published_at|timesince }} ago
-                                {% endif %}
-                            </small>
-                        </div>
-                        <p class="mb-0 text-black-50 opacity-75">
-                            {{ quiz.description|truncatechars:100 }}
-                        </p>
-                    </div>
-                </div>
-            </a>
-        </div>
-    {% endfor %} -->
 {% endblock %}
+{% block extra_js %}
+    {% if not messages  %}
+        <script type="text/javascript">
+            
+        </script>
+    {% endif %}
+    
+{% endblock extra_js %}

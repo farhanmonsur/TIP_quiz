@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block content %}
+<div>
+    <div class="h1">Reward list</div>
+    <div class="h2">Your points: {{ user_score }}</div>
+
+    {% if reward_list %}
+        <!-- If there are rewards available, display them -->
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Points</th>
+                    <th>Quantity</th>
+                    <th>Exchange</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in reward_list %}
+                <tr id="{{ item.id }}">
+                    <td class="align-middle">{{ item.name }}</td>
+                    <td class="align-middle">{{ item.exchanged_points }}</td>
+                    <td class="align-middle">{{ item.quantity }}</td>
+                    <td>
+                        <form id = "rewardForm" name="rewardForm" method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="reward_id" value="{{ item.id }}">
+                            <button type="button" class="btn btn-outline-primary" onclick="submitReward(event, '{{ item.id }}', '{{ item.exchanged_points }}', '{{ user_score }}')">Exchange</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="" >
+            No rewards are currently available.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+
+{% block extra_js %}
+<script type="text/javascript">
+    function submitReward(event, rewardId, item_score, score) {
+        event.preventDefault()
+        const rewardForm = document.getElementById("rewardForm");
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = "reward_id";
+        input.value = rewardId;
+
+        if(score >= item_score) {
+            alert("Congratulations! Contact your teacher to receive your reward and please enjoy your prize :)" )
+            rewardForm.appendChild(input);
+            rewardForm.submit();
+        }
+        else {
+            alert("Sorry, you do not have enough scores." )
+        }
+    }
+</script>
+{% endblock %}

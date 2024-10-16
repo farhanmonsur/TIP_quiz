@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div>
+    {% csrf_token %}
+    <div>
+        <div class = "h1">Leaderboard</div>
+        <table class = "table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Username</th>
+                    <th>Score</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user_data in user_scores %}
+                <tr>
+                    <td>{{ user_data.id }}</td>
+                    <td>{{ user_data.user }}</td>
+                    <td>{{ user_data.score }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
