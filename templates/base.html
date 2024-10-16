@@ -10,24 +10,27 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" >
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
     <link href="{% static 'css/list-groups.css' %}" rel="stylesheet" >
 
     <title>Quiz App - {% block title %}{{title}}{% endblock title %}</title>
     {% block extra_css %}{% endblock extra_css %}
   </head>
   <body id = "body" style="background: #eee">
-    <div class="container p-5">
-      <div class="card {% block card_cls %}col-md-6 offset-md-3{% endblock %}" style="min-height: 60vh; max-height: 90vh">
-
-        <nav class="navbar border-bottom border-3">
-          <div class="container-fluid">
-            <a href="{% url 'quiz:index' %}" class="navbar-brand text-dark fw-bold fs-4">Quiz App</a>
-            <div class="d-flex gap-3">
+    <div class="container p-5 vh-100 vw-100">
+      <!-- <div class="card {% block card_cls %}col-md-6 offset-md-3{% endblock %}"> -->
+      <div class="h-100 d-flex flex-column">
+        <nav class="navbar mb-2 border-2 card " style = "background-color: #5856D6;">
+          <div class="d-flex justify-content-between w-100 m-auto px-4">
+            <a href="{% url 'quiz:index' %}" class="navbar-brand text-white fw-bold fs-4 ">Quiz App</a>
+            <div class="d-flex my-auto">
               {% if not request.user.is_authenticated %}
                 <a class="btn btn-sm btn-primary" href="{% url 'login' %}">Login</a>
               {% else %}
-                <a class="btn btn-sm btn-link text-decoration-none fw-bold text-dark" href="{% url 'quiz:quizzes' %}">Quizzes</a>
-                <a class="btn btn-sm btn-link text-decoration-none fw-bold text-dark" href="{% url 'quiz:user_quizzes' %}">User Quizzes</a>
+                <a class="btn btn-sm btn-link text-decoration-none fw-bold text-white" href="{% url 'quiz:reward' %}">Reward</a>
+                <a class="btn btn-sm btn-link text-decoration-none fw-bold text-white" href="{% url 'quiz:leaderboard' %}">Leaderboard</a>
+                <a class="btn btn-sm btn-link text-decoration-none fw-bold text-white" href="{% url 'quiz:quizzes' %}">Quizzes</a>
+                <a class="btn btn-sm btn-link text-decoration-none fw-bold text-white" href="{% url 'quiz:user_quizzes' %}">History</a>
                 <form action="{% url 'logout' %}" method="post">
                   {% csrf_token %}
                   <input type="submit" class="btn btn-sm btn-danger" value="Logout">
@@ -37,7 +40,7 @@
           </div>
         </nav>
 
-        <div class="p-4 flex-grow-1 d-flex flex-column">
+        <div class="flex-grow-1 d-flex flex-column card border-2 p-4">
           {% block content %}{% endblock content %}
         </div>
         

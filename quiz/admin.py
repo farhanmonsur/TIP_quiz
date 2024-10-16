@@ -9,7 +9,10 @@ from quiz.models import (
     Question,
     UserQuiz,
     UserQuestionAnswer,
-    Level
+    Level,
+    Reward,
+    UserReward,
+    UserScore,
 )
 
 
@@ -99,6 +102,7 @@ class UserQuestionAnsInline(admin.TabularInline):
     @admin.display(description='Correct?', boolean=True)
     def answer_correct(self, obj):
         return obj.answer.answer
+
 @admin.register(UserQuiz)
 class UserQuizAdmin(admin.ModelAdmin):
     inlines = (UserQuestionAnsInline, )
@@ -106,14 +110,18 @@ class UserQuizAdmin(admin.ModelAdmin):
         'quiz',
         'user',
         'score',
-        'total_score',
+        'total_questions',
         'modified',
-        'created'
+        'created',
+        'is_completed',
+        'is_score_added_total',
+        'start_time',
+        'end_time',
+        'full_time',
     )
     list_filter = ('quiz', 'created',)
     search_fields = ('user', 'quiz__title')
     autocomplete_fields = ('quiz', )
-
 
 class QuizInline(admin.TabularInline):
     model = Quiz
@@ -132,4 +140,17 @@ class LevelAdmin(admin.ModelAdmin):
     list_filter = ('created', 'modified')
     inlines = [QuizInline]  # This adds the quizzes inline to the level admin
 
+@admin.register(Reward)
+class RewardAdmin(admin.ModelAdmin):
+    list_display = ('name', 'description', 'exchanged_points','quantity')
 
+@admin.register(UserReward)
+class UserRewardAdmin(admin.ModelAdmin):
+    list_display = ('user', 'reward', 'redeemed_at')
+    search_fields = ('user__username', 'reward__name')
+    list_filter = ('redeemed_at',)
+
+@admin.register(UserScore)
+class UserScoreAdmin(admin.ModelAdmin):
+    list_display = ('user', 'total_score')
+    search_fields = ('user__username',)

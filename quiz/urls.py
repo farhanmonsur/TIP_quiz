@@ -23,4 +23,6 @@ urlpatterns = [
         views.UserQuizList.as_view(),
         name="user_quizzes"
     ),
+    path('leaderboard', views.LeaderboardView.as_view(), name="leaderboard"),
+    path('reward', views.RewardView.as_view(), name="reward"),
 ]

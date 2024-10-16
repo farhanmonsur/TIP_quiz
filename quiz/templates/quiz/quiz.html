@@ -4,15 +4,6 @@
 
 {% block content %}
 <h1 class="fs-3 pb-4">Levels</h1>
-    <!-- {% if not quiz_list %}
-        <div class="col-12 card">
-            <div class="card-body">
-                <p class="mb-0 card-text fw-bold text-center text-danger">
-                    No Quizzes added yet.
-                </p>
-            </div>
-        </div>
-    {% endif %} -->
     <ul>
     {% for level in levels %}
         <li><a href="{% url 'quiz:level_quizzes' level.slug %}">{{ level.name }}</a></li>
