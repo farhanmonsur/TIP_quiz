@@ -53,10 +53,10 @@
         input.type = "hidden";
         input.name = "reward_id";
         input.value = rewardId;
+        rewardForm.appendChild(input);
 
-        if(score >= item_score) {
+        if(parseInt(score) >= parseInt(item_score)) {
             alert("Congratulations! Contact your teacher to receive your reward and please enjoy your prize :)" )
-            rewardForm.appendChild(input);
             rewardForm.submit();
         }
         else {
