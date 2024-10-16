@@ -3,16 +3,14 @@
 {% block title %}{{ title }}{% endblock title %}
 
 {% block content %}
-  <h2 class="text-center">{{ level.name }} Quizzes</h2>
-  <p>{{ level.description }}</p>
+  <h2 class="text-left">{{ level.name }} Quizzes</h2>
+  <p class = "h5">{{ level.description }}</p>
 
-  <ul class="list-group">
+  <div class="p-0 container d-flex flex-column">
     {% for quiz in quizzes %}
-      <li class="">
-        <a href="{% url 'quiz:quiz_detail' quiz.slug %}">{{ quiz.title }}</a>
-      </li>
+        <a class = "d-block p-3 my-2 rounded" style = "text-decoration: none; color: #5856D6; background-color: #E7E7E7" href="{% url 'quiz:quiz_detail' quiz.slug %}">{{ quiz.title }}</a>
     {% empty %}
-      <li class="list-group-item">No quizzes available for this level.</li>
+      <div>No quizzes available for this level.</div>
     {% endfor %}
-  </ul>
+  </div>
 {% endblock content %}
